@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scattered Layout</title>
+<style>
+  * { box-sizing: border-box; user-select: none; }
+  body { margin:0; min-height:100vh; background:#1e1f2b; font-family:system-ui,'Segoe UI',Roboto,sans-serif; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .image-canvas { position:relative; width:95vw; max-width:1400px; height:70vh; min-height:450px; background:#252734; border-radius:40px; box-shadow:inset 0 0 0 1px #4a4d62, 0 25px 40px -10px black; overflow:hidden; border:1px solid #5f6382; background-image:radial-gradient(circle at 30% 40%, #2f3145 0%, #1b1d2a 100%); }
+  .draggable-item { position:absolute; cursor:grab; transition:filter .15s; filter:drop-shadow(0 6px 10px rgba(0,0,0,.5)); transform-origin:center center; }
+  .draggable-item.selected { outline:2px solid #b9b9ff; outline-offset:3px; filter:drop-shadow(0 0 12px #b1b1ff) drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
+  .video-wrapper { position:relative; }
+  .video-wrapper.selected { outline:2px solid #b9b9ff; outline-offset:3px; }
+  .video-drag-handle:active { cursor:grabbing; }
+</style>
+</head>
+<body>
+<div class="image-canvas" id="imageCanvas">
+
+<div class="draggable-item" data-type="image" style="left:215.569px; top:200.949px; transform:rotate(12.8738deg); cursor:grab;">
+  <img src="images/cassette.jpg" alt="cassette.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
+</div>
+<div class="draggable-item" data-type="image" style="left:379.606px; top:73.4138px; transform:rotate(11.2608deg); cursor:grab;">
+  <img src="images/newpaperArticle.jpg" alt="newpaperArticle.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
+</div>
+<div class="draggable-item" data-type="image" style="left:456.294px; top:117.187px; transform:rotate(8.46215deg); cursor:grab;">
+  <img src="images/onStage.jpg" alt="onStage.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
+</div>
+<div class="draggable-item" data-type="image" style="left:43.5755px; top:353.828px; transform:rotate(0.480341deg); cursor:grab;">
+  <img src="images/onStageCloseUp.jpg" alt="onStageCloseUp.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
+</div>
+<div class="draggable-item" data-type="image" style="left:360.199px; top:33.6601px; transform:rotate(-11.5337deg); cursor:grab;">
+  <img src="images/poster24Feb.jpg" alt="poster24Feb.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
+</div>
+<div class="draggable-item" data-type="image" style="left:274.259px; top:330.659px; transform:rotate(-11.1601deg); cursor:grab;">
+  <img src="images/posterStained23Sept.jpg" alt="posterStained23Sept.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
+</div>
+<div class="draggable-item" data-type="image" style="left:115.096px; top:38.2783px; transform:rotate(-10.8392deg); cursor:grab;">
+  <img src="images/songList.jpg" alt="songList.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
+</div>
+<div class="draggable-item" data-type="image" style="left:24.2507px; top:172.262px; transform:rotate(-7.96391deg); cursor:grab;">
+  <img src="images/steveLyonsArticle.jpg" alt="steveLyonsArticle.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
+</div>
+<div class="draggable-item" data-type="video" style="left:245.909px; top:131.958px; transform:rotate(-3.21711deg); cursor:grab;">
+  <div class="video-wrapper" style="position:relative; background:#0a0a10; border-radius:10px; overflow:hidden; border:2px solid #3a3a55;">
+    <div class="video-drag-handle" style="position:absolute; top:0; left:0; right:0; height:22px; background:rgba(20,22,34,0.85); color:#cfd4e8; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px; cursor:grab; z-index:10; border-bottom:1px solid #4a4d62;">⠿ drag</div>
+    <iframe src="https://www.youtube.com/embed/videoseries?list=PLJsQGxTZzYPAUKf1yQwLU0vharkoSkKAK" style="display:block; width:320px; height:180px; border:none; margin-top:22px;" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  </div>
+</div>
+</div>
+<script>
+(function(){
+  const canvas = document.getElementById('imageCanvas');
+  let selectedItem = null, isDragging = false, dragOffsetX = 0, dragOffsetY = 0, dragTarget = null, dragIframe = null;
+
+  function bringToFront(el){ if(!el||!el.parentNode)return; if(canvas.lastElementChild===el)return; canvas.appendChild(el); }
+  function clearSelection(){ if(selectedItem){ selectedItem.classList.remove('selected'); const vw=selectedItem.querySelector('.video-wrapper'); if(vw)vw.classList.remove('selected'); selectedItem=null; } }
+
+  function startDrag(element, e, iframeToDisable){
+    if(e.button!==0)return;
+    e.preventDefault(); e.stopPropagation();
+    bringToFront(element);
+    clearSelection();
+    element.classList.add('selected');
+    const vw = element.querySelector('.video-wrapper');
+    if(vw) vw.classList.add('selected');
+    selectedItem = element;
+    isDragging = true; dragTarget = element; dragIframe = iframeToDisable;
+    if(dragIframe) dragIframe.style.pointerEvents = 'none';
+    const cr = canvas.getBoundingClientRect();
+    const mx = e.clientX - cr.left, my = e.clientY - cr.top;
+    const cl = parseFloat(element.style.left)||0, ct = parseFloat(element.style.top)||0;
+    dragOffsetX = mx - cl; dragOffsetY = my - ct;
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }
+
+  function onMove(e){
+    if(!isDragging||!dragTarget)return;
+    e.preventDefault();
+    const cr = canvas.getBoundingClientRect();
+    const mx = e.clientX - cr.left, my = e.clientY - cr.top;
+    let nl = mx - dragOffsetX, nt = my - dragOffsetY;
+    const r = dragTarget.getBoundingClientRect();
+    nl = Math.min(Math.max(0, nl), Math.max(0, cr.width - r.width));
+    nt = Math.min(Math.max(0, nt), Math.max(0, cr.height - r.height));
+    dragTarget.style.left = nl + 'px'; dragTarget.style.top = nt + 'px';
+  }
+
+  function onUp(){
+    if(!isDragging)return;
+    if(dragIframe) dragIframe.style.pointerEvents = '';
+    dragTarget = null; dragIframe = null; isDragging = false;
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+
+  canvas.querySelectorAll('.draggable-item').forEach(el => {
+    el.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      const iframe = el.querySelector('iframe');
+      if (e.target === iframe) return;
+      startDrag(el, e, iframe);
+    });
+    const handle = el.querySelector('.video-drag-handle');
+    if (handle) {
+      handle.addEventListener('mousedown', (e) => {
+        const iframe = el.querySelector('iframe');
+        e.stopPropagation();
+        startDrag(el, e, iframe);
+      });
+    }
+  });
+
+  canvas.addEventListener('click', (e) => {
+    if (!e.target.closest('.draggable-item')) clearSelection();
+  });
+
+  canvas.addEventListener('dragstart', (e) => {
+    if (e.target.closest('.draggable-item')) e.preventDefault();
+  });
+})();
+</script>
+</body>
+</html>
