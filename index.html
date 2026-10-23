@@ -2,123 +2,149 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Scattered Layout</title>
 <style>
-  * { box-sizing: border-box; user-select: none; }
-  body { margin:0; min-height:100vh; background:#1e1f2b; font-family:system-ui,'Segoe UI',Roboto,sans-serif; display:flex; align-items:center; justify-content:center; padding:20px; }
-  .image-canvas { position:relative; width:95vw; max-width:1400px; height:70vh; min-height:450px; background:#252734; border-radius:40px; box-shadow:inset 0 0 0 1px #4a4d62, 0 25px 40px -10px black; overflow:hidden; border:1px solid #5f6382; background-image:radial-gradient(circle at 30% 40%, #2f3145 0%, #1b1d2a 100%); }
-  .draggable-item { position:absolute; cursor:grab; transition:filter .15s; filter:drop-shadow(0 6px 10px rgba(0,0,0,.5)); transform-origin:center center; }
+  * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+  body { margin:0; min-height:100vh; background:#1e1f2b; font-family:system-ui,'Segoe UI',Roboto,sans-serif; display:flex; align-items:center; justify-content:center; padding:12px; }
+  .image-canvas { position:relative; width:95vw; max-width:1400px; height:70vh; min-height:400px; background:#252734; border-radius:24px; box-shadow:inset 0 0 0 1px #4a4d62, 0 25px 40px -10px black; overflow:hidden; border:1px solid #5f6382; background-image:radial-gradient(circle at 30% 40%, #2f3145 0%, #1b1d2a 100%); touch-action:none; }
+  .draggable-item { position:absolute; cursor:grab; transition:filter .15s; filter:drop-shadow(0 6px 10px rgba(0,0,0,.5)); transform-origin:center center; touch-action:none; }
   .draggable-item.selected { outline:2px solid #b9b9ff; outline-offset:3px; filter:drop-shadow(0 0 12px #b1b1ff) drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
-  .video-wrapper { position:relative; }
+  .video-wrapper { position:relative; background:#0a0a10; border-radius:10px; overflow:hidden; border:2px solid #3a3a55; }
+  .video-wrapper iframe { display:block; width:100%; height:calc(100% - 20px); border:none; position:absolute; top:20px; left:0; z-index:1; }
+  .video-drag-handle { position:absolute; top:0; left:0; right:0; height:20px; background:rgba(20,22,34,0.85); color:#cfd4e8; font-size:10px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px; cursor:grab; z-index:50; border-bottom:1px solid #4a4d62; letter-spacing:.5px; touch-action:none; }
+  .video-resize-grip { position:absolute; right:-2px; bottom:-2px; width:28px; height:28px; background:linear-gradient(135deg, transparent 50%, #8a8ae0 50%, #8a8ae0 62%, transparent 62%, transparent 72%, #8a8ae0 72%, #8a8ae0 82%, transparent 82%); cursor:nwse-resize; z-index:100; touch-action:none; pointer-events:auto; border-bottom-right-radius:4px; }
   .video-wrapper.selected { outline:2px solid #b9b9ff; outline-offset:3px; }
-  .video-drag-handle:active { cursor:grabbing; }
+  @media (max-width:640px) { .image-canvas { height:78vh; border-radius:16px; } }
 </style>
 </head>
 <body>
 <div class="image-canvas" id="imageCanvas">
 
-<div class="draggable-item" data-type="image" style="left:215.569px; top:200.949px; transform:rotate(12.8738deg); cursor:grab;">
+<div class="draggable-item" data-type="video" style="left:160.895px; top:176.595px; transform:rotate(-9.17227deg); cursor:grab;">
+  <div class="video-wrapper" style="position:relative; width:413px; height:274px; background:#0a0a10; border-radius:10px; overflow:hidden; border:2px solid #3a3a55;">
+    <div class="video-drag-handle" style="position:absolute; top:0; left:0; right:0; height:20px; background:rgba(20,22,34,0.85); color:#cfd4e8; font-size:10px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px; cursor:grab; z-index:50; border-bottom:1px solid #4a4d62;">⠿ drag</div>
+    <iframe src="https://www.youtube.com/embed/videoseries?controls=1&modestbranding=1&rel=0&iv_load_policy=3&list=PLJsQGxTZzYPAUKf1yQwLU0vharkoSkKAK" style="display:block; width:100%; height:calc(100% - 20px); border:none; position:absolute; top:20px; left:0; z-index:1;" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  </div>
+  <div class="video-resize-grip" style="position:absolute; right:-2px; bottom:-2px; width:28px; height:28px; background:linear-gradient(135deg, transparent 50%, #8a8ae0 50%, #8a8ae0 62%, transparent 62%, transparent 72%, #8a8ae0 72%, #8a8ae0 82%, transparent 82%); cursor:nwse-resize; z-index:100; pointer-events:auto; border-bottom-right-radius:4px;"></div>
+</div>
+<div class="draggable-item" data-type="image" style="left:5.2671px; top:150.908px; transform:rotate(10.075deg); cursor:grab;">
   <img src="images/cassette.jpg" alt="cassette.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:379.606px; top:73.4138px; transform:rotate(11.2608deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:403.872px; top:38.1584px; transform:rotate(10.7985deg); cursor:grab;">
   <img src="images/newpaperArticle.jpg" alt="newpaperArticle.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:456.294px; top:117.187px; transform:rotate(8.46215deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:138.36px; top:306.442px; transform:rotate(6.08932deg); cursor:grab;">
   <img src="images/onStage.jpg" alt="onStage.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:43.5755px; top:353.828px; transform:rotate(0.480341deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:138.939px; top:44.1035px; transform:rotate(-11.2165deg); cursor:grab;">
   <img src="images/onStageCloseUp.jpg" alt="onStageCloseUp.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:360.199px; top:33.6601px; transform:rotate(-11.5337deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:187.276px; top:237.962px; transform:rotate(-14.9301deg); cursor:grab;">
   <img src="images/poster24Feb.jpg" alt="poster24Feb.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:274.259px; top:330.659px; transform:rotate(-11.1601deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:397.774px; top:393.709px; transform:rotate(-10.0843deg); cursor:grab;">
   <img src="images/posterStained23Sept.jpg" alt="posterStained23Sept.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:115.096px; top:38.2783px; transform:rotate(-10.8392deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:532.703px; top:27.024px; transform:rotate(-7.62985deg); cursor:grab;">
   <img src="images/songList.jpg" alt="songList.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:24.2507px; top:172.262px; transform:rotate(-7.96391deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:93.2057px; top:355.189px; transform:rotate(4.93389deg); cursor:grab;">
   <img src="images/steveLyonsArticle.jpg" alt="steveLyonsArticle.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
-</div>
-<div class="draggable-item" data-type="video" style="left:245.909px; top:131.958px; transform:rotate(-3.21711deg); cursor:grab;">
-  <div class="video-wrapper" style="position:relative; background:#0a0a10; border-radius:10px; overflow:hidden; border:2px solid #3a3a55;">
-    <div class="video-drag-handle" style="position:absolute; top:0; left:0; right:0; height:22px; background:rgba(20,22,34,0.85); color:#cfd4e8; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px; cursor:grab; z-index:10; border-bottom:1px solid #4a4d62;">⠿ drag</div>
-    <iframe src="https://www.youtube.com/embed/videoseries?list=PLJsQGxTZzYPAUKf1yQwLU0vharkoSkKAK" style="display:block; width:320px; height:180px; border:none; margin-top:22px;" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-  </div>
 </div>
 </div>
 <script>
 (function(){
   const canvas = document.getElementById('imageCanvas');
-  let selectedItem = null, isDragging = false, dragOffsetX = 0, dragOffsetY = 0, dragTarget = null, dragIframe = null;
+  let selectedItem = null;
+  let activeGesture = null, dragTarget = null, dragIframe = null, dragOffsetX = 0, dragOffsetY = 0;
+  let resizeTarget = null, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
 
   function bringToFront(el){ if(!el||!el.parentNode)return; if(canvas.lastElementChild===el)return; canvas.appendChild(el); }
   function clearSelection(){ if(selectedItem){ selectedItem.classList.remove('selected'); const vw=selectedItem.querySelector('.video-wrapper'); if(vw)vw.classList.remove('selected'); selectedItem=null; } }
 
-  function startDrag(element, e, iframeToDisable){
-    if(e.button!==0)return;
-    e.preventDefault(); e.stopPropagation();
-    bringToFront(element);
-    clearSelection();
-    element.classList.add('selected');
-    const vw = element.querySelector('.video-wrapper');
-    if(vw) vw.classList.add('selected');
-    selectedItem = element;
-    isDragging = true; dragTarget = element; dragIframe = iframeToDisable;
-    if(dragIframe) dragIframe.style.pointerEvents = 'none';
-    const cr = canvas.getBoundingClientRect();
-    const mx = e.clientX - cr.left, my = e.clientY - cr.top;
-    const cl = parseFloat(element.style.left)||0, ct = parseFloat(element.style.top)||0;
-    dragOffsetX = mx - cl; dragOffsetY = my - ct;
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
+  function beginGesture(type, wrapper, iframe, e){
+    bringToFront(wrapper); clearSelection();
+    wrapper.classList.add('selected');
+    const vw = wrapper.querySelector('.video-wrapper'); if(vw) vw.classList.add('selected');
+    selectedItem = wrapper;
+    if(iframe) iframe.style.pointerEvents = 'none';
+    activeGesture = type;
+    if(type === 'drag'){
+      dragTarget = wrapper; dragIframe = iframe || null;
+      const cr = canvas.getBoundingClientRect();
+      dragOffsetX = (e.clientX - cr.left) - (parseFloat(wrapper.style.left)||0);
+      dragOffsetY = (e.clientY - cr.top) - (parseFloat(wrapper.style.top)||0);
+    } else if(type === 'resize'){
+      const vw2 = wrapper.querySelector('.video-wrapper');
+      resizeTarget = { wrapper, videoWrapper: vw2, iframe };
+      resizeStartX = e.clientX; resizeStartY = e.clientY;
+      resizeStartW = vw2.offsetWidth; resizeStartH = vw2.offsetHeight;
+    }
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onEnd);
+    document.addEventListener('pointercancel', onEnd);
   }
 
   function onMove(e){
-    if(!isDragging||!dragTarget)return;
-    e.preventDefault();
-    const cr = canvas.getBoundingClientRect();
-    const mx = e.clientX - cr.left, my = e.clientY - cr.top;
-    let nl = mx - dragOffsetX, nt = my - dragOffsetY;
-    const r = dragTarget.getBoundingClientRect();
-    nl = Math.min(Math.max(0, nl), Math.max(0, cr.width - r.width));
-    nt = Math.min(Math.max(0, nt), Math.max(0, cr.height - r.height));
-    dragTarget.style.left = nl + 'px'; dragTarget.style.top = nt + 'px';
-  }
-
-  function onUp(){
-    if(!isDragging)return;
-    if(dragIframe) dragIframe.style.pointerEvents = '';
-    dragTarget = null; dragIframe = null; isDragging = false;
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup', onUp);
-  }
-
-  canvas.querySelectorAll('.draggable-item').forEach(el => {
-    el.addEventListener('mousedown', (e) => {
-      if (e.button !== 0) return;
-      const iframe = el.querySelector('iframe');
-      if (e.target === iframe) return;
-      startDrag(el, e, iframe);
-    });
-    const handle = el.querySelector('.video-drag-handle');
-    if (handle) {
-      handle.addEventListener('mousedown', (e) => {
-        const iframe = el.querySelector('iframe');
-        e.stopPropagation();
-        startDrag(el, e, iframe);
-      });
+    if(!activeGesture) return;
+    if(activeGesture === 'drag'){
+      const cr = canvas.getBoundingClientRect();
+      let nl = (e.clientX - cr.left) - dragOffsetX;
+      let nt = (e.clientY - cr.top) - dragOffsetY;
+      const r = dragTarget.getBoundingClientRect();
+      nl = Math.min(Math.max(0, nl), Math.max(0, cr.width - r.width));
+      nt = Math.min(Math.max(0, nt), Math.max(0, cr.height - r.height));
+      dragTarget.style.left = nl + 'px'; dragTarget.style.top = nt + 'px';
+    } else if(activeGesture === 'resize'){
+      const minW = 180, minH = 120;
+      const cr = canvas.getBoundingClientRect();
+      const wl = parseFloat(resizeTarget.wrapper.style.left)||0;
+      const wt = parseFloat(resizeTarget.wrapper.style.top)||0;
+      let nw = resizeStartW + (e.clientX - resizeStartX);
+      let nh = resizeStartH + (e.clientY - resizeStartY);
+      nw = Math.max(minW, Math.min(nw, cr.width - wl - 4));
+      nh = Math.max(minH, Math.min(nh, cr.height - wt - 4));
+      resizeTarget.videoWrapper.style.width = nw + 'px';
+      resizeTarget.videoWrapper.style.height = nh + 'px';
     }
+    if(e.cancelable) e.preventDefault();
+  }
+
+  function onEnd(){
+    if(dragIframe) dragIframe.style.pointerEvents = '';
+    if(resizeTarget && resizeTarget.iframe) resizeTarget.iframe.style.pointerEvents = '';
+    activeGesture = null; dragTarget = null; dragIframe = null; resizeTarget = null;
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onEnd);
+    document.removeEventListener('pointercancel', onEnd);
+  }
+
+  canvas.addEventListener('pointerdown', (e) => {
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
+    const wrapper = e.target.closest('.draggable-item');
+    if(!wrapper) return;
+    const grip = wrapper.querySelector('.video-resize-grip');
+    const handle = wrapper.querySelector('.video-drag-handle');
+    const iframe = wrapper.querySelector('iframe');
+    if(grip && (e.target === grip || grip.contains(e.target))){
+      e.preventDefault(); e.stopPropagation();
+      beginGesture('resize', wrapper, iframe, e); return;
+    }
+    if(handle && (e.target === handle || handle.contains(e.target))){
+      e.preventDefault(); e.stopPropagation();
+      beginGesture('drag', wrapper, iframe, e); return;
+    }
+    if(iframe && e.target === iframe) return;
+    e.preventDefault(); e.stopPropagation();
+    beginGesture('drag', wrapper, iframe, e);
   });
 
   canvas.addEventListener('click', (e) => {
-    if (!e.target.closest('.draggable-item')) clearSelection();
+    if(!e.target.closest('.draggable-item')) clearSelection();
   });
-
   canvas.addEventListener('dragstart', (e) => {
-    if (e.target.closest('.draggable-item')) e.preventDefault();
+    if(e.target.closest('.draggable-item')) e.preventDefault();
   });
 })();
 </script>
