@@ -7,65 +7,27 @@
 <style>
   * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
   html, body { margin:0; padding:0; height:100%; background:#1e1f2b; overflow:hidden; }
-  body {
-    font-family: system-ui,'Segoe UI',Roboto,sans-serif;
-    display:flex; align-items:center; justify-content:center;
-    min-height:100vh; min-height:100dvh;
-  }
-
-  /* Stage fills the viewport; the canvas inside is scaled to fit */
-  .stage {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background:
-      radial-gradient(circle at 30% 40%, #2f3145 0%, #1b1d2a 100%);
-    touch-action: none;
-  }
-
-  /* The canvas keeps the DESIGN pixel dimensions from export time, and is
-     scaled via transform so it fits whatever viewport we're on. */
-  .image-canvas {
-    position: relative;
-    width: 569px;
-    height: 646px;
-    background: #252734;
-    border-radius: 24px;
-    box-shadow: inset 0 0 0 1px #4a4d62, 0 25px 40px -10px black;
-    overflow: hidden;
-    border: 1px solid #5f6382;
-    background-image: radial-gradient(circle at 30% 40%, #2f3145 0%, #1b1d2a 100%);
-    transform-origin: center center;
-    touch-action: none;
-    flex: 0 0 auto;
-  }
-
-  .draggable-item {
-    position:absolute; cursor:grab;
-    transition:filter .15s;
-    filter:drop-shadow(0 6px 10px rgba(0,0,0,.5));
-    transform-origin:center center;
-    touch-action:none;
-  }
-  .draggable-item.selected {
-    outline:2px solid #b9b9ff; outline-offset:3px;
-    filter:drop-shadow(0 0 12px #b1b1ff) drop-shadow(0 6px 10px rgba(0,0,0,.6));
-  }
+  body { font-family: system-ui,'Segoe UI',Roboto,sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; min-height:100dvh; }
+  .stage { position: relative; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 30% 40%, #2f3145 0%, #1b1d2a 100%); touch-action: none; }
+  .image-canvas { position: relative; width: 675px; height: 579px; background: #252734; border-radius: 24px; box-shadow: inset 0 0 0 1px #4a4d62, 0 25px 40px -10px black; overflow: hidden; border: 1px solid #5f6382; background-image: radial-gradient(circle at 30% 40%, #2f3145 0%, #1b1d2a 100%); transform-origin: center center; touch-action: none; flex: 0 0 auto; }
+  .draggable-item { position:absolute; cursor:grab; transition:filter .15s; filter:drop-shadow(0 6px 10px rgba(0,0,0,.5)); transform-origin:center center; touch-action:none; }
+  .draggable-item.selected { outline:2px solid #b9b9ff; outline-offset:3px; filter:drop-shadow(0 0 12px #b1b1ff) drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
   .video-wrapper { position:relative; background:#0a0a10; border-radius:10px; overflow:hidden; border:2px solid #3a3a55; }
   .video-wrapper iframe { display:block; width:100%; height:calc(100% - 20px); border:none; position:absolute; top:20px; left:0; z-index:1; }
   .video-drag-handle { position:absolute; top:0; left:0; right:0; height:20px; background:rgba(20,22,34,0.85); color:#cfd4e8; font-size:10px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px; cursor:grab; z-index:50; border-bottom:1px solid #4a4d62; letter-spacing:.5px; touch-action:none; }
   .video-resize-grip { position:absolute; right:-2px; bottom:-2px; width:28px; height:28px; background:linear-gradient(135deg, transparent 50%, #8a8ae0 50%, #8a8ae0 62%, transparent 62%, transparent 72%, #8a8ae0 72%, #8a8ae0 82%, transparent 82%); cursor:nwse-resize; z-index:100; touch-action:none; pointer-events:auto; border-bottom-right-radius:4px; }
   .video-wrapper.selected { outline:2px solid #b9b9ff; outline-offset:3px; }
 
-  /* Mobile: keep the stage filling the screen, but drop the outer padding
-     so the canvas scaled to fit uses the whole area. */
+  /* Lightbox */
+  .lightbox { position: fixed; inset: 0; background: rgba(8,9,14,0.88); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 2000; cursor: zoom-out; padding: 24px; touch-action: none; }
+  .lightbox.open { display: flex; }
+  .lightbox img { display: block; max-width: calc(100vw - 48px); max-height: calc(100vh - 48px); width: auto; height: auto; border-radius: 8px; box-shadow: 0 30px 60px rgba(0,0,0,0.8); object-fit: contain; pointer-events: none; -webkit-user-drag: none; user-select: none; }
+  .lightbox-hint { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); color: #cfd4e8; font-size: 0.8rem; opacity: 0.7; background: rgba(20,22,34,0.7); padding: 6px 14px; border-radius: 40px; pointer-events: none; white-space: nowrap; }
+
   @media (max-width:640px) {
     .image-canvas { border-radius:12px; }
+    .lightbox { padding: 12px; }
+    .lightbox img { max-width: calc(100vw - 24px); max-height: calc(100vh - 24px); }
   }
 </style>
 </head>
@@ -73,82 +35,92 @@
 <div class="stage" id="stage">
   <div class="image-canvas" id="imageCanvas">
 
-<div class="draggable-item" data-type="video" style="left:56.201px; top:207.633px; transform:rotate(10.0119deg); cursor:grab;">
-  <div class="video-wrapper" style="position:relative; width:383px; height:256px; background:#0a0a10; border-radius:10px; overflow:hidden; border:2px solid #3a3a55;">
+<div class="draggable-item" data-type="video" style="left:262.278px; top:278.868px; transform:rotate(6.11335deg); cursor:grab;">
+  <div class="video-wrapper" style="position:relative; width:387px; height:258px; background:#0a0a10; border-radius:10px; overflow:hidden; border:2px solid #3a3a55;">
     <div class="video-drag-handle" style="position:absolute; top:0; left:0; right:0; height:20px; background:rgba(20,22,34,0.85); color:#cfd4e8; font-size:10px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px; cursor:grab; z-index:50; border-bottom:1px solid #4a4d62;">⠿ drag</div>
     <iframe src="https://www.youtube.com/embed/videoseries?controls=1&modestbranding=1&rel=0&iv_load_policy=3&list=PLJsQGxTZzYPAUKf1yQwLU0vharkoSkKAK" style="display:block; width:100%; height:calc(100% - 20px); border:none; position:absolute; top:20px; left:0; z-index:1;" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
   </div>
   <div class="video-resize-grip" style="position:absolute; right:-2px; bottom:-2px; width:28px; height:28px; background:linear-gradient(135deg, transparent 50%, #8a8ae0 50%, #8a8ae0 62%, transparent 62%, transparent 72%, #8a8ae0 72%, #8a8ae0 82%, transparent 82%); cursor:nwse-resize; z-index:100; pointer-events:auto; border-bottom-right-radius:4px;"></div>
 </div>
-<div class="draggable-item" data-type="image" style="left:240.111px; top:38px; transform:rotate(6.33157deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:75.83px; top:354.405px; transform:rotate(4.16129deg); cursor:grab;">
   <img src="images/cassette.jpg" alt="cassette.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:369.918px; top:388.545px; transform:rotate(12.6379deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:258.129px; top:161.743px; transform:rotate(3.83715deg); cursor:grab;">
   <img src="images/newpaperArticle.jpg" alt="newpaperArticle.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:348.017px; top:180.797px; transform:rotate(3.08561deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:428.213px; top:2.28363px; transform:rotate(-6.22389deg); cursor:grab;">
   <img src="images/onStage.jpg" alt="onStage.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:93.964px; top:47.5265px; transform:rotate(-0.311316deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:393.187px; top:192.889px; transform:rotate(13.7436deg); cursor:grab;">
   <img src="images/onStageCloseUp.jpg" alt="onStageCloseUp.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:34.974px; top:425.732px; transform:rotate(-5.19875deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:155.782px; top:185.99px; transform:rotate(10.2103deg); cursor:grab;">
   <img src="images/poster24Feb.jpg" alt="poster24Feb.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:228.724px; top:453.607px; transform:rotate(6.83062deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:236.868px; top:10.7738px; transform:rotate(-3.86105deg); cursor:grab;">
   <img src="images/posterStained23Sept.jpg" alt="posterStained23Sept.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:34.5773px; top:95.9859px; transform:rotate(-4.78471deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:115.019px; top:47.5859px; transform:rotate(-3.06276deg); cursor:grab;">
   <img src="images/songList.jpg" alt="songList.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
-<div class="draggable-item" data-type="image" style="left:440.523px; top:272.079px; transform:rotate(-9.82035deg); cursor:grab;">
+<div class="draggable-item" data-type="image" style="left:258.203px; top:347.067px; transform:rotate(11.9102deg); cursor:grab;">
   <img src="images/steveLyonsArticle.jpg" alt="steveLyonsArticle.jpg" style="display:block; max-width:200px; max-height:200px; width:auto; height:auto; border-radius:6px; pointer-events:none;" draggable="false">
 </div>
   </div>
+</div>
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <img id="lightboxImg" alt="enlarged">
+  <div class="lightbox-hint">double-click / click outside / Esc to close</div>
 </div>
 <script>
 (function(){
   const stage = document.getElementById('stage');
   const canvas = document.getElementById('imageCanvas');
-  const DESIGN_W = 569;
-  const DESIGN_H = 646;
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const DESIGN_W = 675;
+  const DESIGN_H = 579;
 
-  // ---- Fit-to-viewport scaling ----
+  // Fit-to-viewport scaling
   function fit() {
     const vw = stage.clientWidth;
     const vh = stage.clientHeight;
-    // Small margin so the border/shadow aren't clipped on very tight screens
     const pad = 8;
-    const scale = Math.min(
-      (vw - pad) / DESIGN_W,
-      (vh - pad) / DESIGN_H
-    );
-    // On very large viewports, don't blow the canvas up beyond its design size
-    const finalScale = Math.min(scale, 1);
-    canvas.style.transform = 'scale(' + finalScale + ')';
-    canvas.dataset.scale = finalScale;
+    const scale = Math.min((vw - pad) / DESIGN_W, (vh - pad) / DESIGN_H, 1);
+    canvas.style.transform = 'scale(' + scale + ')';
+    canvas.dataset.scale = scale;
   }
   fit();
   window.addEventListener('resize', fit);
   window.addEventListener('orientationchange', () => setTimeout(fit, 100));
 
-  // ---- Gesture handling (coordinates divided by current scale) ----
+  // Lightbox
+  function openLightbox(src, alt) {
+    lightboxImg.src = src;
+    lightboxImg.alt = alt || 'enlarged';
+    lightbox.classList.add('open');
+    lightbox.setAttribute('aria-hidden', 'false');
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    setTimeout(() => { if (!lightbox.classList.contains('open')) lightboxImg.src = ''; }, 300);
+  }
+  lightbox.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+  });
+
+  // Gestures
   let selectedItem = null;
   let activeGesture = null, dragTarget = null, dragIframe = null, dragOffsetX = 0, dragOffsetY = 0;
   let resizeTarget = null, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0;
 
-  function currentScale() {
-    return parseFloat(canvas.dataset.scale) || 1;
-  }
+  function currentScale() { return parseFloat(canvas.dataset.scale) || 1; }
   function canvasPoint(e) {
     const r = canvas.getBoundingClientRect();
     const s = currentScale();
-    // r already includes the scale (it's the rendered rect).
-    // Convert client coords to design-space coords inside the canvas.
-    return {
-      x: (e.clientX - r.left) / s,
-      y: (e.clientY - r.top) / s
-    };
+    return { x: (e.clientX - r.left) / s, y: (e.clientY - r.top) / s };
   }
 
   function bringToFront(el){ if(!el||!el.parentNode)return; if(canvas.lastElementChild===el)return; canvas.appendChild(el); }
@@ -161,7 +133,6 @@
     selectedItem = wrapper;
     if(iframe) iframe.style.pointerEvents = 'none';
     activeGesture = type;
-
     if(type === 'drag'){
       dragTarget = wrapper; dragIframe = iframe || null;
       const p = canvasPoint(e);
@@ -170,12 +141,9 @@
     } else if(type === 'resize'){
       const vw2 = wrapper.querySelector('.video-wrapper');
       resizeTarget = { wrapper, videoWrapper: vw2, iframe };
-      resizeStartX = e.clientX;
-      resizeStartY = e.clientY;
-      resizeStartW = vw2.offsetWidth;
-      resizeStartH = vw2.offsetHeight;
+      resizeStartX = e.clientX; resizeStartY = e.clientY;
+      resizeStartW = vw2.offsetWidth; resizeStartH = vw2.offsetHeight;
     }
-
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', onEnd);
     document.addEventListener('pointercancel', onEnd);
@@ -184,7 +152,6 @@
   function onMove(e){
     if(!activeGesture) return;
     const s = currentScale();
-
     if(activeGesture === 'drag'){
       const p = canvasPoint(e);
       let nl = p.x - dragOffsetX;
@@ -197,7 +164,6 @@
       dragTarget.style.top = nt + 'px';
     } else if(activeGesture === 'resize'){
       const minW = 180, minH = 120;
-      // Deltas in design space
       const dx = (e.clientX - resizeStartX) / s;
       const dy = (e.clientY - resizeStartY) / s;
       const wl = parseFloat(resizeTarget.wrapper.style.left)||0;
@@ -220,6 +186,18 @@
     document.removeEventListener('pointerup', onEnd);
     document.removeEventListener('pointercancel', onEnd);
   }
+
+  // Attach double-click handler for images and gesture handlers
+  canvas.querySelectorAll('.draggable-item[data-type="image"]').forEach(el => {
+    const img = el.querySelector('img');
+    if (img) {
+      el.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openLightbox(img.src, img.alt);
+      });
+    }
+  });
 
   canvas.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse' && e.button !== 0) return;
